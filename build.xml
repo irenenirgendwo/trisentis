@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="trisentis" default="fulljar" basedir=".">
+	<description>
+		The sigma-game and Trisentis - play and analyse the games!
+	</description>
+
+	<!-- set project related properties -->
+	<property name="projectname" value="trisentis" />
+
+	<property name="project.lib" value="lib" />
+	<property name="project.src" value="src" />
+	<property name="build.dir" value="build" />
+	<property name="build.src.dir" value="${build.dir}/sources" />
+	<property name="build.classes.dir" value="${build.dir}/classes" />
+	<property name="dist.dir" value="." />
+	<property name="main.class" value="gui.MainFrame" />
+	<property name="project.doc" value="doc" />
+	<property name="project.res" value="bilder" />
+
+	<target name="fulljar" depends="compile,spill_out_jars" description="generate the stand-alone jar file">
+		<copy todir="${build.classes.dir}">
+			<fileset dir="${project.res}" includes="**/*" />
+		</copy>		
+		<delete file="${dist.dir}/${projectname}.jar" />
+		<jar jarfile="${dist.dir}/${projectname}.jar">
+			<fileset dir="${build.classes.dir}">
+				<not>
+					<or>
+						<filename name="**/package.html" />
+						<filename name="**/doc-files/**/*" />
+						<filename name="**/META-INF/**/*" />
+					</or>
+				</not>
+			</fileset>
+			<manifest>
+				<attribute name="Main-Class" value="${main.class}" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="compile" depends="init,collect_sources">
+		<path id="lib.path.ref">
+			<fileset dir="${project.lib}" includes="*.jar" />
+			<pathelement path="${build.classes.dir}" />
+		</path>
+		<javac
+			includeantruntime="false"
+			srcdir="${build.src.dir}"
+			destdir="${build.classes.dir}"
+			verbose="no"
+			source="1.6"
+			target="1.6"
+			encoding="utf-8"
+			classpathref="lib.path.ref"
+		/>
+	</target>
+
+	<target name="spill_out_jars">
+		<unjar dest="${build.classes.dir}">
+			<fileset dir="${project.lib}">
+				<filename name="*.jar" />
+			</fileset>
+		</unjar>
+	</target>
+
+	<target name="init" depends="clean">
+		<delete dir="${build.dir}" />
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${build.src.dir}" />
+		<mkdir dir="${build.classes.dir}" />
+	</target>
+
+	<target name="collect_sources">
+		<copy todir="${build.src.dir}">
+			<fileset dir="${project.src}">
+				<filename name="**/*.java" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="clean" description="restores the original state, the jar stays">
+		<delete dir="${build.dir}" />
+	</target>
+
+	<target name="doc" description="generate the javadocs for this project.">
+		<delete dir="${project.doc}" />
+		<mkdir dir="${project.doc}" />
+		<path id="lib.path.ref">
+			<fileset dir="${project.lib}" includes="*.jar" />
+			<pathelement path="${build.classes.dir}" />
+		</path>
+		<javadoc 
+			destdir="${project.doc}" 
+			sourcepath="${project.src}" 	
+			classpathref="lib.path.ref"
+		/>
+	</target>
+
+</project>
